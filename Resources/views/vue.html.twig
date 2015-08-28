@@ -1,0 +1,244 @@
+{% set layout = "ClarolineCoreBundle:Workspace:layout.html.twig" %}
+
+{% if isDesktop() %}
+    {% set layout = "ClarolineCoreBundle:Desktop:layout.html.twig" %}
+{% endif %}
+
+{% extends layout %}
+{% block breadcrumb %}
+    {{
+    macros.breadcrumbs([
+    {
+        'icon': 'icon-briefcase',
+        'name': 'desktop'|trans({}, 'tools'),
+        'href': path('claro_desktop_open')
+    },
+    {
+        'name': 'CPAlex',
+        'href': ''
+    }])
+    }}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('bundles/cpalexdashboard/css/style.css') }}" type="text/css" rel="stylesheet"/>
+    <link href="{{ asset('bundles/ujmexo/css/tableLayout.css') }}" type="text/css" rel="stylesheet"/>
+{% endblock %}
+{% block section_content %}
+    <div class="panel-heading">
+        <h4>Dashboard</h4>
+    </div>
+{#TEST DE MENU DEROULANT    #}
+<form action="{{ path('filter_exo_user') }}" method="POST" id="formfilter">
+    {% if user is defined %}
+        <div class ="col-md-2">
+            <label for="liste1">Liste des utilisateurs:</label>
+            <select class="form-control" name="selectuser" id="liste1">
+                <option value=0>Tous les utilisateurs</option>
+                {% for utilisateur in user %}
+                    <option value={{utilisateur.id }} {% if userid == utilisateur.id %}selected="selected"{% endif %}>{{utilisateur.firstname}} {{  utilisateur.lastName}}</option>
+                {% endfor %}
+
+            </select>
+        </div>
+        {% endif %}
+    {% if exercise is defined %}
+        <div class ="col-md-2">
+            <label for="liste2">Liste des exercices:</label>
+            <select class="form-control" name="selectexo" id="liste2">
+                <option value=0>Tous les exercices</option>
+                {% for exercice in exercise %}
+                    <option value={{exercice.id }} {% if exoid == exercice.id %}selected="selected"{% endif %}>{{exercice.title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary" id="but1">Rechercher</button>
+            {#Test AJAX#}
+            <button type="button" class="btn btn-primary" id="bouton2" onclick="postForm('{{ path('filter_ajax') }}')">Recherche AJAX</button>
+            {% if check is defined and check == 1 %}
+                {#Afficher_cacher, fonction js permetant d'afficher on non une div par exemple#}
+                <span class="btn btn-primary" id="bouton_texte" onclick="afficher_cacher('details');">Détails</span>
+            {% endif %}
+            {% if check is defined and check == 2 %}
+                {#Afficher_cacher, fonction js permetant d'afficher on non une div par exemple#}
+                <span class="btn btn-primary" id="bouton_texte" onclick="afficher_cacher('perso');">Détails</span>
+            {% endif %}
+        </div>
+        <div id="ok"></div>
+        </form>
+        {#<input type="submit" class="btn btn-primary" id="bouton2" onsubmit="postForm("{{ path('filter_ajax') }}");" value="Bouton" />#}
+    {% endif %}
+<section class="container">
+    <table class="table table-striped table-bordered table-condensed records_list" id="UserArray">
+    <thead>
+    <tr style="background-color: lightsteelblue;">
+        <th class="classic">
+            {{ 'user' | trans }}
+        </th>
+        <th class="classic" >
+            {{ 'Exercice'}}
+
+        </th>
+        <th class="classic">
+            {{ 'start_date' | trans }}
+        </th>
+        {#Utilisation de la fonction SortQuestions déveleppé par UJM , permet de classer les dates par ancienneté ou recense#}
+        <th class="classic" onclick="SortQuestions('endDate', 'UserArray');"
+            onmouseover="this.style.color = '#0099FF'; body.style.cursor = 'pointer';"
+            onmouseout="this.style.color = 'black'; body.style.cursor = 'default';">
+            <i class="fa fa-chevron-up" id="upE"  style="display: none;"></i>
+            <i class="fa fa-chevron-down" id="downE"  style="display: none;"></i>
+            {{ 'end_date' | trans }}
+        </th>
+        <th class="classic" onclick="SortQuestions('mark', 'UserArray');"
+            onmouseover="this.style.color = '#0099FF'; body.style.cursor = 'pointer';"
+            onmouseout="this.style.color = 'black'; body.style.cursor = 'default';">
+            <i class="fa fa-chevron-up" id="upM"  style="display: none;"></i>
+            <i class="fa fa-chevron-down" id="downM"  style="display: none;"></i>
+            {{ 'score' | trans }}
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+        {% if paper is defined %}
+            {% set papers = paper %}
+        {% endif %}
+        {#Liste des valriables utiliser pour l'exploitation des données des copies#}
+        {% set format = 'd/m/Y \\- H\\hi\\ms\\s' %} <!-- Y-m-d H:i:s  /!\ if alter format, alter sorting -->
+        {% set somme=0 %}
+        {% set i=0 %}
+        {% set j=0 %}
+        {% set scrb=20 %}
+        {% set scrh=0 %}
+        {% set bestuserfirstname='undefined' %}
+        {% set bestuserlastname='undefined' %}
+        {% set bestnote='undefined' %}
+        {% set worseuser='pas encore définie' %}
+        {% set worsenote='indéterminée.' %}
+        {% set numpaper ='numéro' %}
+
+        {% if papers is defined %}
+            {% for paper in papers %}
+                <tr id="tr1">
+                    <td class="classic" id="td1">
+                        {{ paper.user.firstname }} {{ paper.user.lastName }}
+                    </td>
+                    <td class="classic" id="td2" >
+                        {{ paper.exercise.title}}
+                    </td>
+                    <td class="classic" id="td3">
+                        {% if paper.start %}{{ paper.start|date(format) }}{% else %}-{% endif %}
+                    </td>
+                    <td class="classic" id="td4">
+                        {% if paper.end %}{{ paper.end|date(format) }}{% else %}-{% endif %}
+                    </td>
+
+                        {% set scoreFinal = arrayMarkPapers[paper.id].scorePaper / arrayMarkPapers[paper.id].maxExoScore %}
+                        {% set scoreFinal = scoreFinal * 20 %}
+                        {% set scoreFinal = roundUpOrDown(scoreFinal) %}
+
+
+                        {% if arrayMarkPapers[paper.id].scoreTemp == true %}
+                            <td class="classic" style="color: red" id="td5"> {{ scoreFinal }} / 20</td>
+                        {% else %}
+                            <td class="classic" id="td5"> {{ scoreFinal }} / 20</td>
+                            {% endif %}
+                    {#Portion de code permettant de calculer la moyenne pour un exo et de définir le meilleur et le moins bon éléve#}
+                    {% set somme = somme + scoreFinal %}
+                    {% if scoreFinal<scrb %}
+                        {% set  worseuser= paper.user.firstname%}
+                        {% set  worsenote=scoreFinal %}
+                        {% set scrb =scoreFinal %}
+                    {% elseif scoreFinal > scrh %}
+                        {% set  bestuserfirstname= paper.user.firstname %}
+                        {% set bestuserlastname= paper.user.lastName %}
+                        {% set  bestnote=scoreFinal %}
+                        {% set scrh =scoreFinal %}
+                        {% set numpaper= paper.numPaper %}
+                    {% endif %}
+                    {% set i=i+1%}
+                    {% if scoreFinal >=10 %}
+                        {% set j=j+1 %}
+                    {% endif %}
+            {% endfor %}
+        {% endif %}
+    </tr>
+    </tbody>
+</table>
+</section>
+    <div>
+    <p id="nbcopie"></p>       {#Les balises avec les id : nbcopie,tentative et moyenne sont utilisée dans reload.js#}
+    <p id="tentative"></p>
+    <p id="moyenne"></p>
+    <p id="note"></p>
+    <p id="taux"></p></div>
+    <div id="perso" style="display:none">
+    {% if copiemanquante is defined and copiemanquante ==1 %}
+        <center><p><h4>Aucune copie disponible sur cet exercice</h4></p></center>
+    {% endif %}
+    {% if tentative is defined and tentative !=0%}
+        <p>Nombre de tentative pour cette exercice : {{ tentative }}</p>
+        <p>Meilleur note: {{ bestnote }}/20 à la tentative n° {{ numpaper }}</p>
+        <p>Moyenne sur l' exercice : {{ somme/i }}/20</p>
+    {% endif %}
+    </div>
+    <footer id="details" style="display:none">
+    {% if check is defined %}
+    {% if check == 1 %}
+ <table>
+     <tr>
+    {% if i>0 %}
+        <td style="border:5px solid #f5f5f5"><center>
+        <p><b> Moyenne générale</b></p>
+        <p><img src="http://chart.apis.google.com/chart?cht=p&chd=t:{{ roundUpOrDown(somme/i) }},{{ 20-roundUpOrDown(somme/i) }}&chs=250x150&chl={{ roundUpOrDown(somme/i) }}/20" ></p>
+            </center></td>
+    {% endif %}
+    {% if j>=0 %}
+        <td style="border:5px solid #f5f5f5"><center>
+        <p><b> Taux de notes au dessus de la moyenne</b></p>
+        <p><img src="http://chart.apis.google.com/chart?cht=gom&chd=t:{{ j*100/i }}&chs=250x150&chl={{ roundUpOrDown(j*100/i)}}%" ></p>
+            </center></td>
+    {% endif %}
+       <div>
+                {% if nbpaper is defined %}
+                    <p><b>Nombre de copie pour cet exercice : {{ nbpaper }}</b></p>
+                {% endif %}
+
+             {% if bestuserfirstname is defined %}
+                 <p><b>Le meilleur élève  pour cet exercice est {{ bestuserfirstname}} {{  bestuserlastname }} avec la note de {{ bestnote }} /20</b></p>
+             {% endif %}
+
+    {% if worseuser is defined %}
+        <p><b>     Le pire élève  pour cet exercice est {{ worseuser }} avec la note de {{ worsenote }} /20</b></p>
+    {% endif %}
+    {% endif %}
+    </div>
+     </tr>
+ </table>
+    {% endif %}
+</footer>
+
+    {% if pager is defined %}
+        {% if pager.haveToPaginate %}
+            <div class="text-center panel-footer">
+                {{ pagerfanta(pager, 'twitter_bootstrap_translated', {'routeName': 'cpa_paper_list',
+                    'routeParams': { 'exerciseId': paperst[0].exercise.id } }) }}
+            </div>
+        {% endif %}
+    {% endif %}
+
+
+{% endblock %}
+
+
+{% block javascripts %}
+    {{ parent() }}
+    <script type="text/javascript" src="{{ asset('bundles/cpalexdashboard/js/displayexolist.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/cpalexdashboard/js/afficher_cacher_div.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/cpalexdashboard/js/sortAndSearch.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/cpalexdashboard/js/reload.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/ujmexo/js/exercise.js') }}"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+{% endblock %}

@@ -1,0 +1,6 @@
+claroline.listener.CPAlex
+_mytool:
+    class: CPAlex\DashboardBundle\Listener\CPAlexListener.php
+    tags:
+      - { name: kernel.event_listener, event: open_tool_desktop_CPAlex, method: onDisplayDesktop}
+      - { name: kernel.event_listener, event: open_tool_workspace_CPAlex, method: onDisplayWorkspace}

@@ -1,0 +1,21 @@
+dashboard_controller:
+    resource: "@CPAlexDashboardBundle/Controller/DashboardController.php"
+    type: annotation
+    prefix: /
+
+filter_exo_user:
+    pattern: /filterexouser
+    defaults:
+            _controller: "CPAlexDashboardBundle:Dashboard:Filter"
+
+cpa_paper_list:
+    pattern:  /list/{exerciseId}/{page}/{all}
+    defaults: { _controller: CPAlexDashboardBundle:Dashboard:Filter, page: 2, all: 0 }
+
+filter_ajax:
+    pattern: /filterajax
+    defaults: { _controller: CPAlexDashboardBundle:Dashboard:FilterAjax }
+    requirements:
+      _method: POST
+    options:
+       expose: true

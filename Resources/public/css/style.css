@@ -1,0 +1,28 @@
+#appear
+{
+    display: none;
+
+}
+
+#searchbar{
+    position:relative;
+    width:1040px;
+    height:auto;
+    display:inline-block;
+}
+#searchbar .text{
+    width:300px;
+    float:left;
+}
+#searchbar .champ{
+    width:200px;
+    height:35px;
+    float:left;
+}
+#searchbar .bouton{
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border:none;
+    float:left;
+}

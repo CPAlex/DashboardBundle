@@ -1,0 +1,59 @@
+{% set layout = "ClarolineCoreBundle:Workspace:layout.html.twig" %}
+
+{% if isDesktop() %}
+    {% set layout = "ClarolineCoreBundle:Desktop:layout.html.twig" %}
+{% endif %}
+
+{% extends layout %}
+
+{% block breadcrumb %}
+    {{
+    macros.breadcrumbs([
+    {
+        'icon': 'icon-briefcase',
+        'name': 'desktop'|trans({}, 'tools'),
+        'href': path('claro_desktop_open')
+    },
+    {
+        'name': 'CPAlex',
+        'href': ''
+    }])
+    }}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('bundles/cpalexdashboard/css/style.css') }}" type="text/css" rel="stylesheet"/>
+{% endblock %}
+
+{% block section_content %}
+<div class="panel-heading">
+    <h2><center>Dashboard</center></h2>
+</div>
+    <a class="btn btn-primary" href="{{ path('ExolistAction') }}">Menu déroulant exercices</a>
+<div class="panel-body">
+    {% if exoID is defined %}
+        <div class ="col-md-2">
+            <label for="liste1">Liste des exercices:</label>
+            <select class="form-control" name="select" id="liste1" onchange="affichetest()" >
+            {#<select class="form-control" name="select" id="liste1"  onchange="alert('Index: ' + this.selectedIndex + '\nValeur: ' +#}
+            this.options[this.selectedIndex].value)">
+                <option value='0'>Tous les exercices</option>
+                {% for name in listeexo %}
+                    <option id="exercise_{{ name.id }}" value={{ name.id }}>{{name.title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    {% endif %}
+<div id="appear">
+    TOTO
+</div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript" src="{{ asset('bundles/cpalexdashboard/js/displayexolist.js') }}"></script>
+    <script type="text/javascript">
+        affichetest();
+    </script>
+{% endblock %}
