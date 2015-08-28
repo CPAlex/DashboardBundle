@@ -1,42 +1,3 @@
-/**
- * Created by gallaial on 30/07/2015.
- */
-/**
-*.texte
-*{
-*    border:1px solid #333333;
-*    background:#eeeeee;
-*    padding:10px;
-*    color:#333333;
-*}
-*
-*.texte:hover
-*{
-*    border:1px solid #000000;
-*    background:#cccccc;
-*    color:#000000;
-*}
-*/
-function affichetest()
-{
-
-        $('#appear').css({'display': 'block'});
-
-}
-
-function bonjour()
-{
-
-            var liste1, value1,liste2,value2;
-            liste1 = document.getElementById("liste1");
-            liste2 = document.getElementById("liste2");
-            value1 = liste1.options[liste1.selectedIndex].value;
-            value2 = liste2.options[liste2.selectedIndex].value;
-            alert("l'id de l'utilisateur est "+value1);
-            alert("l'id de l'exercice est "+value2);
-}
-
-// To import questions
 // To import questions
 var questionId = [];
 var pos = 0;
@@ -404,7 +365,6 @@ function switchType(type, array) {
             break;
     }
 }
-
 // To sort decreasing
 function DESC(a, b) {
     a = a[1];

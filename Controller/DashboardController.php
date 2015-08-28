@@ -59,14 +59,12 @@ class DashboardController extends Controller
             $userId = $request->get('selectuser');
             $exerciseId = $request->get('selectexo');
         }
-
         $em=$this->getDoctrine()->getManager();
         $allpaper=$em->getRepository('UJMExoBundle:Paper')->findAll();
         $exercise=$em->getRepository('UJMExoBundle:Exercise')->findById($allpaper);
         $user=$em->getRepository('ClarolineCoreBundle:User')->findById($allpaper);
         $nbpaper=$em->getRepository('UJMExoBundle:Paper')->countPapers($exerciseId);
         $check=0;
-        $usert = $this->container->get('security.token_storage')->getToken()->getUser();
 
         if($userId==0 && $exerciseId==0)  //Cas ou on choisie dans le menu déroulant tous les exo et tous les users
         {
@@ -83,35 +81,28 @@ class DashboardController extends Controller
         }
         else    //Cas ou on choisie un utilisateur et un exercice particulié
         {
-
             $paper=$em->getRepository('UJMExoBundle:Paper')->getExerciseUserPapers($userId, $exerciseId, $finished = false);
             $tentative=$this->container->get('ujm.exercise_services')->getNbPaper($userId, $exerciseId, $finished = false);
             $check=2;
-
-
         }
         //Une fois le cas définie, on récupère les scores pour chaque copie afin de les exploiter dans la vue
         $tab=array();
-        if($paper!=NULL){
-        foreach ($paper as $p)
+        if($paper!=NULL)
         {
-            $arrayMarkPapers[$p->getId()] = $this->container->get('ujm.exercise_services')->getInfosPaper($p);
-
+        foreach ($paper as $p)
+            {
+                $arrayMarkPapers[$p->getId()] = $this->container->get('ujm.exercise_services')->getInfosPaper($p);
+            }
         }
-}
-        else {
+        else
+        {
             $arrayMarkPapers=NULL;
             $copiemanquante=1;
         }
-
-        //essai classement
-
         foreach ($paper as $p)
         {
             $tab[$p->getId()] = $this->container->get('ujm.exercise_services')->getExercisePaperTotalScore($p);
-
         }
-
         // Partie pagination en test
         $nbUserPaper = count($paper);
         $max = 4; // Max per page
@@ -126,7 +117,6 @@ class DashboardController extends Controller
         } catch (\Pagerfanta\Exception\NotValidCurrentPageException $e) {
             throw $this->createNotFoundException("Cette page n'existe pas.");
         }
-
         return $this->render(
             'CPAlexDashboardBundle::vue.html.twig',
             array(
@@ -136,7 +126,7 @@ class DashboardController extends Controller
                 'exercise'          => $exercise,
                 'user'              => $user,
                 'allpaper'          => $allpaper,
-                //'check'             => $check,
+                'check'             => $check,
                 'pager'             => $pagerfanta,
                 'nbUserPaper'       => $nbUserPaper,
                 'paperst'           =>$paperst,
@@ -166,13 +156,8 @@ class DashboardController extends Controller
             $userId = $request->get('selectuser');
             $exerciseId = $request->get('selectexo');
         }
-
         $em=$this->getDoctrine()->getManager();
         $allpaper=$em->getRepository('UJMExoBundle:Paper')->findAll();
-        $exercise=$em->getRepository('UJMExoBundle:Exercise')->findById($allpaper);
-        $user=$em->getRepository('ClarolineCoreBundle:User')->findById($allpaper);
-        $check=0;
-        $nbpaper=0;
         $tentative=0;// Nombre de tenative de l'étudiant initialisé à zéro
         $nbcopie=0;// Nombre de copie initialisé à zéro;
 
@@ -210,9 +195,6 @@ class DashboardController extends Controller
                 "score"=>$arrayMarkPapers[$p->getId()],
             );
         }
-
-//$vars['paper']= $paper;
-
         $response = new JsonResponse(
             array(
                 'data'=>$vars,
@@ -220,20 +202,5 @@ class DashboardController extends Controller
                 'tentative'=>$tentative,
         ));
         return $response;
-
-//        $nbUserPaper = count($paper);
-//
-//        $max = 10; // Max per page
-//        $adapter = new ArrayAdapter($paper);
-//        $pagerfanta = new Pagerfanta($adapter);
-//
-//        try {
-//            $paperst = $pagerfanta
-//                ->setMaxPerPage($max)
-//                ->setCurrentPage($page)
-//                ->getCurrentPageResults();
-//        } catch (\Pagerfanta\Exception\NotValidCurrentPageException $e) {
-//            throw $this->createNotFoundException("Cette page n'existe pas.");
-//        }
     }
 }

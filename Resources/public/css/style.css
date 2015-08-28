@@ -3,10 +3,10 @@
     display: none;
 
 }
-
 #searchbar{
     position:relative;
     width:1040px;
+	left: 50%;
     height:auto;
     display:inline-block;
 }
