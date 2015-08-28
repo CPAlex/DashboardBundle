@@ -23,11 +23,9 @@ function postForm(url){
                 url: url, // Le nom du fichier indiqu� dans le formulaire
                 type: "post", // La m�thode indiqu�e dans le formulaire (get ou post)
                 data: {
-                       //'userId':selectuser,
-                        //'exerciseId':selectexo
                     selectuser:selectuser,
                     selectexo:selectexo
-                },
+                    },
 				dataType: "Json",
 				success : function(response) {
                     console.log((response.data).length);
